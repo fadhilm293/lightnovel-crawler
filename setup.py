@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import sys
 
 if sys.version_info[:2] < (3, 6):
@@ -18,12 +19,12 @@ else:
     from setuptools import config, setup
 
     def parse_version(filename):
-        with open(filename, 'r') as f:
+        with open(filename, 'r', encoding='utf8') as f:
             return f.read().strip()
     # end def
 
     def parse_requirements(filename):
-        with open(filename, 'r', encoding='utf-8') as f:
+        with open(filename, 'r', encoding='utf8') as f:
             requirements = f.read().strip().split('\n')
             requirements = [
                 r.strip() for r in requirements

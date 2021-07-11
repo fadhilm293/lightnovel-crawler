@@ -14,8 +14,6 @@ For example, see any of the files inside this directory.
 import importlib
 import os
 import re
-import sys
-from urllib.parse import urlparse
 
 from ..utils.crawler import Crawler
 
@@ -45,29 +43,33 @@ rejected_sources = {
     'https://888novel.com/': 'Gets IP banned for using crawler',
     'https://novelraw.blogspot.com/': 'Site closed down',
     'https://www.novelspread.com/': 'Site is down',
-    'https://www.translateindo.com/': 'Site is down'
+    'https://www.translateindo.com/': 'Site is down',
+    'https://dsrealmtranslations.com/': 'Site is down'
 }
 
 # this list will be auto-generated
 crawler_list = {}
 
 # auto-import all submodules in the current directory
+__sources_dir = os.path.dirname(__file__)
 __module_regex = re.compile(r'^([^_.][^.]+).py[c]?$', re.I)
 __url_regex = re.compile(r'^^(https?|ftp)://[^\s/$.?#].[^\s]*$', re.I)
 
-for entry in os.listdir(__path__[0]):
-    file_path = os.path.join(__path__[0], entry)
-    if not os.path.isfile(file_path):
-        continue
-    # end if
 
-    regex_result = __module_regex.findall(entry)
+def load_crawler_file(file_path, local_module=False):
+    global crawler_list
+
+    basename = os.path.basename(file_path)
+    regex_result = __module_regex.findall(basename)
     if len(regex_result) != 1:  # does not contains a module
-        continue
+        return
     # end if
 
     module_name = regex_result[0]
-    module = importlib.import_module('.' + module_name, package=__package__)
+    if local_module:
+        module = importlib.import_module('.' + module_name, package=__package__)
+    else:
+        module = importlib.import_module(module_name, package=__package__)
 
     for key in dir(module):
         item = getattr(module, key)
@@ -101,4 +103,12 @@ for entry in os.listdir(__path__[0]):
             crawler_list[url] = item
         # end for
     # end for
+# end def
+
+
+for entry in os.listdir(__sources_dir):
+    file_path = os.path.join(__sources_dir, entry)
+    if os.path.isfile(file_path):
+        load_crawler_file(file_path, True)
+    # end if
 # end for
